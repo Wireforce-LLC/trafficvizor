@@ -1,5 +1,3 @@
-'use server';
-
 import RootLayout from "@/app/layout";
 import Navbar, {PluginNavbar} from "@/components/Navbar";
 import {Fragment, lazy, Suspense, useEffect, useState} from "react";
