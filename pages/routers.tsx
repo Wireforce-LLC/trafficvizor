@@ -1,14 +1,13 @@
 import RootLayout from "@/app/layout";
-import Navbar from "@/components/Navbar";
+import Navbar, {PluginNavbar} from "@/components/Navbar";
+import {lazy} from "react";
+import AnalyticCardAllTraffic from "@/components/AnalyticCardAllTraffic";
+import ClassicLayout from "@/components/ClassicLayout";
 
-export default function Index() {
-  return <RootLayout>
-    <Navbar/>
+const TableRouters = lazy(() => import("@/components/TableRouters"))
 
-    <div className="mx-auto container">
-      <div className="my-12 block">
-        <h1>Lorem ipsum dolor.</h1>
-      </div>
-    </div>
-  </RootLayout>
+export default function Routers() {
+  return <ClassicLayout modalComponents={[]} name="Routers">
+    <TableRouters/>
+  </ClassicLayout>
 }

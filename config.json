@@ -1,0 +1,17 @@
+{
+  "main": {
+    "network": {
+      "trafficLightUri": "http://127.0.0.1:3001",
+      "trafficLightAuthHeader": "Basic cm9vdDpyb290"
+    }
+  },
+  "-plugins": [
+    {
+      "id": "CloudFunctions",
+      "type": "UI",
+      "options": {
+        "menuName": "Cloud Functions"
+      }
+    }
+  ]
+}

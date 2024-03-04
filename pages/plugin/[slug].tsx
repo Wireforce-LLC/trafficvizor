@@ -1,33 +1,52 @@
+'use server';
+
 import RootLayout from "@/app/layout";
 import Navbar, {PluginNavbar} from "@/components/Navbar";
-import {Fragment, lazy, useEffect, useState} from "react";
+import {Fragment, lazy, Suspense, useEffect, useState} from "react";
 import {$pluginKit} from "@/app/kits/PluginKit";
 import {useRouter} from "next/router";
 import _ from "lodash";
+import ViewSpinner from "@/components/ViewSpinner";
+import PluginView from "@/components/PluginView";
+import dynamic from 'next/dynamic';
+import ViewErrored from "@/components/ViewErrored";
 
 export default function Slug() {
-  const [component, setComponent] = useState<any>()
+  const [pluginName, setPluginName] = useState<string|undefined>()
+  const [activeHref, setActiveHref] = useState<string>('/')
+  const [component, setComponent] = useState<any>(undefined)
+
   const router = useRouter()
 
   useEffect(() => {
+    setActiveHref(`/plugin/${pluginName}`)
 
     $pluginKit.getAllUiPlugins().then(plugins => {
-      console.log(router.query)
       const item = _.find(plugins, {
-        id: router.query.slug
+        id: pluginName
       })
 
-      if (item.filePath) {
-        setComponent(() => lazy(() => import(item.filePath)))
+      if (item?.id) {
+        $pluginKit
+          .getPluginLinks(item.id)
+          .then(component => {
+            setComponent(component)
+          })
       }
     })
+  }, [pluginName]);
+
+  useEffect(() => {
+    setPluginName(window.location.pathname.replace('/plugin/', ''))
   }, []);
 
   return <RootLayout>
-    <PluginNavbar activeHref={'/'}/>
+    <PluginNavbar activeHref={activeHref}/>
 
     <Fragment>
-      Lorem ipsum dolor.
+      <Suspense fallback={<ViewSpinner text="Loading plugin"/>}>
+        {typeof component == 'object' ? component.component : <ViewErrored text="Error"/>}
+      </Suspense>
     </Fragment>
   </RootLayout>
 }
