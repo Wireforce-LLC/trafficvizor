@@ -101,7 +101,7 @@ export default function TableRoutesCalls({ onItemSelected }: Props) {
                 className="py-2 w-full font-semibold bg-lime-200 text-xs border border-lime-300 rounded px-3"
                 type="number"
                 onChange={(e) => {
-                  setLimit(e.target.value)
+                  setLimit(_.parseInt(e.target.value))
                 }}
             />
           </div>

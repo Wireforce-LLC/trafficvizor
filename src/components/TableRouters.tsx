@@ -53,7 +53,7 @@ export default function TableRouters() {
         })
         .then((data) => {
           setRouters(
-            _.get(data.data, "data", null)?.map((i) => {
+            _.get(data.data, "data", null)?.map((i: any) => {
               return {
                 name: i,
                 path: `${baseUrl}/router/${i}`,

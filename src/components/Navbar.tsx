@@ -9,7 +9,7 @@ interface Props {
     label: string;
     href: string;
     isActive: () => boolean;
-  };
+  }[];
 }
 
 export default function Navbar({ activeHref, appendItems }: Props) {
@@ -84,11 +84,13 @@ export function PluginNavbar({ activeHref }: { activeHref: string }) {
         <Navbar
           activeHref={activeHref}
           appendItems={_.take<any>(
-            plugins?.map((i: any) => ({
-              href: `/plugin/${i.id}`,
-              label: i.options.menuName,
-              isActive: () => activeHref == `/plugin/${i.id}`,
-            })) || [],
+            plugins?.map((i: any) => {
+              return {
+                href: `/plugin/${i.id}`,
+                label: String(i.options.menuName),
+                isActive: () => activeHref == `/plugin/${i.id}`,
+              }
+            }) || [],
             6,
           )}
         />,
