@@ -23,52 +23,49 @@ import { $modal } from "@/components/Modal";
 import JsonView from "@uiw/react-json-view";
 import ViewRouter from "@/components/ViewRouter";
 import camelCase from 'camelcase';
+import {$networkKit} from "@/app/kits/NetworkKit";
 
 type Record = {
   name: string;
   path: string;
 };
 
+function ModalContent({props}: {props: any}) {
+  return <If condition={_.get(props, "router", undefined)}>
+    <Then>
+      <ViewRouter routerName={_.get(props, "router", undefined)}/>
+    </Then>
+  </If>
+}
+
 export default function TableRouters() {
-  const { component, openModalWithProps } = $modal("Router view", (props) => {
-    return <ViewRouter routerName={_.get(props, "router", undefined)}/>
-  });
+  const { component, openModalWithProps } = $modal(
+      "Router view",
+      props => <ModalContent props={props}/>
+  )
 
-  const [routers, setRouters] = useState<Record[]>([]);
-  const [state, setState] = useState<TableKit.TableState>("CREATED");
-
-  useEffect(() => {
-    setState("FETCHING");
-
-    $pluginKit.getConfigs().then((config) => {
-      const baseUrl = _.get(config, "main.network.trafficLightUri");
-      const params = new URLSearchParams();
-
-      axios
-        .get(`${baseUrl}/system/routers`, {
-          headers: {
-            Authorization: _.get(config, "main.network.trafficLightAuthHeader"),
-          },
-          params,
-        })
-        .then((data) => {
-          setRouters(
-            _.get(data.data, "data", null)?.map((i: any) => {
-              return {
-                name: i,
-                path: `${baseUrl}/router/${i}`,
-              };
-            }),
-          );
+  const {value: routers, forceUpdate} = $networkKit.liveGetData<any[]>(
+      `system/routers`,
+      "GET",
+      undefined,
+      (data) => _.get(data, "data.data", []),
+      {
+        onDone() {
           setState("RENDERED");
-        })
-        .catch((e) => setState("ERRORED"));
-    });
-  }, []);
+        },
+        onStart() {
+          setState("FETCHING");
+        },
+        onError() {
+        }
+      },
+  );
+
+  const [state, setState] = useState<TableKit.TableState>("CREATED");
 
   const columnHelper = createColumnHelper<Record>(); //Pass User type as the generic TData type
   const table = useReactTable({
-    data: routers,
+    data: routers || [],
     getCoreRowModel: getCoreRowModel(),
     onStateChange(updater: Updater<TableState>): void {},
     renderFallbackValue: undefined,
@@ -79,7 +76,7 @@ export default function TableRouters() {
         enableColumnFilter: true,
         cell: (info) => {
           const name: string | null =
-            _.get(routers[info.row.index], "name") || null;
+              (routers||[])[info.row.index] || null;
 
           return (
               <div className="space-x-2 flex flex-row items-center justify-start">
@@ -101,16 +98,18 @@ export default function TableRouters() {
         enableColumnFilter: true,
         cell: (info) => {
           const path: string | null =
-              _.get(routers[info.row.index], "path") || null;
+              (routers||[])[info.row.index] || null;
+
+          const host = localStorage.getItem('host')
 
           return (
               <div className="space-x-1 flex flex-row items-center justify-start">
               <Link
                 className="text-blue-500 hover:text-blue-800"
-                href={path || "/#"}
+                href={host + "/router/" + path || "-"}
                 target={"_blank"}
               >
-                {path || "-"}
+                {host + "/router/" + path || "-"}
               </Link>
             </div>
           );
@@ -154,7 +153,7 @@ export default function TableRouters() {
                   <tr
                     key={row.id}
                     onClick={() =>
-                      openModalWithProps({ router: routers[index].name })
+                      openModalWithProps({ router: (routers||[])[index] })
                     }
                     className={`border-b border-gray-200 cursor-pointer hover:bg-orange-50 ${!(index % 2) ? "bg-gray-100" : "bg-white"}`}
                   >

@@ -17,22 +17,26 @@ export default function AnalyticCardAllTraffic() {
   const { value: valueAllDuration } = $networkKit.liveGetData<number>(
     "dataset/count",
     "POST",
-    {},
-    (data) => _.get(data, "data.data.count", Infinity),
+    {
+      // "meta.noindex": {
+      //   '$ne': true,
+      // },
+    },
+    (data) => _.get(data, "data.data.count", undefined),
   );
 
   const { value: valueTodayDuration } = $networkKit.liveGetData<number>(
     `dataset/count?${params}`,
     "POST",
     {},
-    (data) => _.get(data, "data.data.count", Infinity),
+    (data) => _.get(data, "data.data.count", undefined),
   );
 
   return (
     <AnalyticCard
       text="Number of today and all requests in the system"
-      value={Intl.NumberFormat("en").format(valueTodayDuration || Infinity)}
-      subValue={Intl.NumberFormat("en").format(valueAllDuration || Infinity)}
+      value={Intl.NumberFormat("en").format(valueTodayDuration || 0)}
+      subValue={Intl.NumberFormat("en").format(valueAllDuration || 0)}
       icon={
         <svg
           xmlns="http://www.w3.org/2000/svg"

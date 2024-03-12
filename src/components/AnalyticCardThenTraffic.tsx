@@ -19,7 +19,7 @@ export default function AnalyticCardThenTraffic() {
   return (
     <AnalyticCard
       text="Volume of successfully passed traffic"
-      value={Intl.NumberFormat("en").format(value || Infinity)}
+      value={Intl.NumberFormat("en").format(value || 0)}
       icon={
         <div className="w-4 h-4 mr-2 relative">
           <div className="rounded-full w-4 h-4 absolute bg-lime-500 animate-ping"></div>

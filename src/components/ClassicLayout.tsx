@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
+import {Fragment, ReactNode} from "react";
 import RootLayout from "@/app/layout";
 import { PluginNavbar } from "@/components/Navbar";
 import Navigator, { Route } from "@/components/Navigator";
 import AnalyticCardAllTraffic from "@/components/AnalyticCardAllTraffic";
 import { useRouter } from "next/router";
+import {NextSeo} from "next-seo";
 
 interface Props {
   readonly children?: ReactNode;
@@ -24,7 +25,11 @@ export default function ClassicLayout({
     <RootLayout>
       <PluginNavbar activeHref={router.pathname} />
 
-      {modalComponents}
+      <NextSeo
+          title={"TrafficVizor | " + name}
+      />
+
+      {modalComponents?.map(modal => <Fragment children={modal}/>)}
 
       <div className="mx-auto container">
         <div className="my-12 block space-y-4">
