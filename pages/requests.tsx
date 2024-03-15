@@ -28,7 +28,7 @@ export default function Requests() {
                   clipRule="evenodd"/>
           </svg>
 
-          <Link href={"#"} className="text-blue-500">{props.path}</Link>
+          <Link href={"#"} className="text-blue-500">{props?.http?.httpPath}</Link>
         </div>
 
         <div className='px-4 py-2 bg-gray-50 text-xs flex flex-row items-center gap-2 rounded-xl w-full'>
@@ -89,10 +89,6 @@ export default function Requests() {
   // ConnectModal()
   return <ClassicLayout modalComponents={[ConnectModal(), componentOverview, mainTableUnpacked.modalComponent]}
                         name="Requests">
-    <NextSeo
-        title="TrafficVizor"
-        description="Platform for analyzing incoming traffic and its distribution"
-    />
 
     <div className="grid gap-4 grid-cols-0 md:grid-cols-3 lg:grid-cols-4">
       <AnalyticCardAllTraffic/>

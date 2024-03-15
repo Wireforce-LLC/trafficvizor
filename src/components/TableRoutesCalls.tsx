@@ -200,7 +200,7 @@ export default function TableRoutesCalls({onItemSelected}: Props) {
         cell: (info) => {
           const groupName = _.get(
               (requests || [])[info.row.index],
-              "meta.group",
+              "routerMeta.group",
               null,
           )
 
@@ -309,11 +309,18 @@ export default function TableRoutesCalls({onItemSelected}: Props) {
       columnHelper.accessor("path", {
         header: () => "Path",
         size: 100,
-        cell: (info) => (
-          <span className="flex items-center justify-start space-x-2">
-            <span>{info.renderValue()}</span>
+        cell: (info) => {
+          const httpPath = _.get(
+              (requests || [])[info.row.index],
+              "http.httpPath",
+              null,
+          )
+
+          return <span className="flex items-center justify-start space-x-2">
+            <span>{httpPath}</span>
           </span>
-        ),
+
+        },
       }),
 
       columnHelper.accessor("ua", {
