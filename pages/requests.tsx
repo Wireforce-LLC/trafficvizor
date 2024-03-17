@@ -12,6 +12,7 @@ import Link from "next/link";
 import {If, Then} from "react-if";
 import _ from "lodash";
 import moment from "moment/moment";
+import ShadowContainer from "@/components/ShadowContainer";
 
 export default function Requests() {
   const {component: componentOverview, openModalWithProps: openModalOverviewWithProps} = $modal(
@@ -93,8 +94,9 @@ export default function Requests() {
     <div className="grid gap-4 grid-cols-0 md:grid-cols-3 lg:grid-cols-4">
       <AnalyticCardAllTraffic/>
       <AnalyticCardThenTraffic/>
-      <div className="bg-gray-50 h-32 rounded px-6 py-4"></div>
-      <div className="bg-gray-50 h-32 rounded px-6 py-4"></div>
+
+      <ShadowContainer className="h-28"/>
+      <ShadowContainer className="h-28"/>
     </div>
 
     {mainTableUnpacked.element}
