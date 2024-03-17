@@ -23,6 +23,7 @@ import * as queryString from "querystring";
 import { BSON, EJSON, ObjectId } from "bson";
 import { $modal } from "@/components/Modal";
 import Input from "@/components/Input";
+import ShadowContainer from "@/components/ShadowContainer";
 
 interface Props {
   readonly onItemSelected: (row: any) => void;
@@ -31,6 +32,7 @@ interface Props {
 type Record = {
   _if: boolean;
   clickAt: string;
+  ip: string;
   path: string;
   country: string;
   asnDomain: string;
@@ -206,13 +208,12 @@ export default function TableRoutesCalls({onItemSelected}: Props) {
 
           return <div className="flex items-center justify-start space-x-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                 className="w-4 h-4 text-orange-500">
+                 className="w-4 h-4 fill-gray-400">
               <path
                   d="M3 3.5A1.5 1.5 0 0 1 4.5 2h1.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12A1.5 1.5 0 0 0 9.62 4H11.5A1.5 1.5 0 0 1 13 5.5v1H3v-3ZM3.081 8a1.5 1.5 0 0 0-1.423 1.974l1 3A1.5 1.5 0 0 0 4.081 14h7.838a1.5 1.5 0 0 0 1.423-1.026l1-3A1.5 1.5 0 0 0 12.919 8H3.081Z"/>
             </svg>
 
-            <span className="text-orange-500 font-semibold">{groupName || "-"}</span>
-
+            <span className="text-gray-400">{groupName || "Uncategorized"}</span>
           </div>
         },
       }),
@@ -222,14 +223,12 @@ export default function TableRoutesCalls({onItemSelected}: Props) {
         size: 80,
         enableColumnFilter: true,
         cell: (info) => (
-            <div
-                className={`space-x-2 ${moment(info.getValue()).diff(moment(), "days") == 0 ? "font-semibold text-indigo-500" : ""}`}
-            >
-              <span>{moment(info.getValue()).format("DD.MM.YYYY")}</span>
-              <span className="text-gray-500">
+          <div className='space-x-2'>
+            <span>{moment(info.getValue()).format("DD.MM.YYYY")}</span>
+            <span className="text-gray-500">
               {moment(info.getValue()).format("HH:mm:ss")}
             </span>
-            </div>
+          </div>
         ),
       }),
 
@@ -323,6 +322,23 @@ export default function TableRoutesCalls({onItemSelected}: Props) {
         },
       }),
 
+      columnHelper.accessor("ip", {
+        header: () => "IP",
+        enableColumnFilter: true,
+        size: 65,
+        cell: (info) => {
+          const ip =
+            _.get((requests || [])[info.row.index], "http.httpHeaders.cf-connecting-ip", null) ||
+            _.get((requests || [])[info.row.index], "http.httpHeaders.x-real-ip", null);
+
+          return (
+            <div className="text-gray-500">
+              <span>{_.take(ip, 16)} {_.size(ip) > 16 ? "..." : ""}</span>
+            </div>
+          );
+        },
+      }),
+
       columnHelper.accessor("ua", {
         header: () => "UA",
         enableColumnFilter: true,
@@ -344,112 +360,114 @@ export default function TableRoutesCalls({onItemSelected}: Props) {
   return {
     modalComponent: component,
     element: (
-        <div>
-          <div className="border border-gray-200 rounded-md overflow-x-auto">
-            <Switch>
-              <Case condition={state == "RENDERED"}>
-                <div className="px-2 py-2 flex flex-row justify-between space-x-2 border-b border-gray-200">
-                  <button
-                      onClick={() => openModalWithProps({})}
-                      className="rounded-lg p-2 bg-lime-50 border border-lime-200"
-                  >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-4 h-4 fill-lime-500"
+      <ShadowContainer className="flex flex-col">
+        <Switch>
+          <Case condition={state == "RENDERED"}>
+            <div className="px-2 w-full py-2 flex flex-row justify-between space-x-2 border-b border-gray-200">
+              <button
+                  onClick={() => openModalWithProps({})}
+                  className="rounded-lg items-center justify-center space-x-2 font-bold text-lime-500 flex flex-row px-2 py-1 bg-lime-50 border border-lime-200"
+              >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-3 h-3 fill-lime-500"
+                >
+                  <path
+                      fillRule="evenodd"
+                      d="M3.792 2.938A49.069 49.069 0 0 1 12 2.25c2.797 0 5.54.236 8.209.688a1.857 1.857 0 0 1 1.541 1.836v1.044a3 3 0 0 1-.879 2.121l-6.182 6.182a1.5 1.5 0 0 0-.439 1.061v2.927a3 3 0 0 1-1.658 2.684l-1.757.878A.75.75 0 0 1 9.75 21v-5.818a1.5 1.5 0 0 0-.44-1.06L3.13 7.938a3 3 0 0 1-.879-2.121V4.774c0-.897.64-1.683 1.542-1.836Z"
+                      clipRule="evenodd"
+                  />
+                </svg>
+                
+                <span>Filter</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto w-full">
+              <table className="table min-w-full overflow-x-auto flex-shrink-0 table-fixed text-xs">
+                <thead className="text-xs table-header text-left text-gray-700 uppercase">
+                {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id} className="text-left">
+                      {headerGroup.headers.map((header) => (
+                          <th
+                              key={header.id}
+                              className="p-2"
+                              scope="col"
+                              colSpan={header.colSpan}
+                              style={{width: `${header.getSize()}px`}}
+                          >
+                            {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                )}
+                          </th>
+                      ))}
+                    </tr>
+                ))}
+                </thead>
+                <tbody>
+                {table.getRowModel().rows.map((row, index) => (
+                    <tr
+                        key={row.id}
+                        onClick={() => {
+                          onItemSelected?.((requests || [])[index] || {});
+                        }}
+                        className={`border-b border-gray-200 cursor-pointer hover:bg-orange-50 ${!(index % 2) ? "bg-gray-100" : "bg-white"}`}
                     >
-                      <path
-                          fillRule="evenodd"
-                          d="M3.792 2.938A49.069 49.069 0 0 1 12 2.25c2.797 0 5.54.236 8.209.688a1.857 1.857 0 0 1 1.541 1.836v1.044a3 3 0 0 1-.879 2.121l-6.182 6.182a1.5 1.5 0 0 0-.439 1.061v2.927a3 3 0 0 1-1.658 2.684l-1.757.878A.75.75 0 0 1 9.75 21v-5.818a1.5 1.5 0 0 0-.44-1.06L3.13 7.938a3 3 0 0 1-.879-2.121V4.774c0-.897.64-1.683 1.542-1.836Z"
-                          clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                      {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id} className="p-2">
+                            {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                            )}
+                          </td>
+                      ))}
+                    </tr>
+                ))}
+                </tbody>
+                <tfoot>
+                {table.getFooterGroups().map((footerGroup) => (
+                    <tr key={footerGroup.id}>
+                      {footerGroup.headers.map((header) => (
+                          <th key={header.id}>
+                            {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.footer,
+                                    header.getContext(),
+                                )}
+                          </th>
+                      ))}
+                    </tr>
+                ))}
+                </tfoot>
+              </table>
+            </div>
+          </Case>
 
-                <table className="table table-fixed text-xs h-full w-full">
-                  <thead className="text-xs table-header text-left text-gray-700 uppercase">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                      <tr key={headerGroup.id} className="text-left">
-                        {headerGroup.headers.map((header) => (
-                            <th
-                                key={header.id}
-                                className="p-2"
-                                scope="col"
-                                colSpan={header.colSpan}
-                                style={{ width: `${header.getSize()}px` }}
-                            >
-                              {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext(),
-                                  )}
-                            </th>
-                        ))}
-                      </tr>
-                  ))}
-                  </thead>
-                  <tbody>
-                  {table.getRowModel().rows.map((row, index) => (
-                      <tr
-                          key={row.id}
-                          onClick={() => {
-                            onItemSelected?.((requests || [])[index] || {});
-                          }}
-                          className={`border-b border-gray-200 cursor-pointer hover:bg-orange-50 ${!(index % 2) ? "bg-gray-100" : "bg-white"}`}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="p-2">
-                              {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                              )}
-                            </td>
-                        ))}
-                      </tr>
-                  ))}
-                  </tbody>
-                  <tfoot>
-                  {table.getFooterGroups().map((footerGroup) => (
-                      <tr key={footerGroup.id}>
-                        {footerGroup.headers.map((header) => (
-                            <th key={header.id}>
-                              {header.isPlaceholder
-                                  ? null
-                                  : flexRender(
-                                      header.column.columnDef.footer,
-                                      header.getContext(),
-                                  )}
-                            </th>
-                        ))}
-                      </tr>
-                  ))}
-                  </tfoot>
-                </table>
-              </Case>
+          <Case condition={state == "FETCHING"}>
+            <div className="p-4">
+              <ViewSpinner
+                  text="We upload all information about created requests to existing routers"
+                  safePadding
+              />
+            </div>
+          </Case>
 
-              <Case condition={state == "FETCHING"}>
-                <div className="p-4">
-                  <ViewSpinner
-                      text="We upload all information about created requests to existing routers"
-                      safePadding
-                  />
-                </div>
-              </Case>
-
-              <Case condition={state == "ERRORED"}>
-                <div className="p-4">
-                  <ViewErrored
-                      text="We bring our changes. Failed to load information. Network error"
-                      safePadding
-                  />
-                </div>
-              </Case>
-            </Switch>
-          </div>
-        </div>
+          <Case condition={state == "ERRORED"}>
+            <div className="p-4">
+              <ViewErrored
+                  text="We bring our changes. Failed to load information. Network error"
+                  safePadding
+              />
+            </div>
+          </Case>
+        </Switch>
+      </ShadowContainer>
     )
   }
 }

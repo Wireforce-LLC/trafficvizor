@@ -3,9 +3,14 @@ import Modal, {$modal} from "@/components/Modal";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import _ from "lodash";
+import axios from "axios";
+import normalizeUrl from "normalize-url";
+import {$networkKit} from "@/app/kits/NetworkKit";
+
+const basic = require('basic-authorization-header');
 
 function ModalContent() {
-  const [host, setHost] = useState('https://api.wireforce.ru')
+  const [host, setHost] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -28,6 +33,14 @@ function ModalContent() {
       localStorage.setItem('username', username)
 
       sessionStorage.setItem('password', password)
+
+      // const auth = basic(username, password)
+      //
+      // axios.get(normalizeUrl(`${host}/system/ping`), {
+      //   headers: {
+      //     'Authorization': auth
+      //   }
+      // })
     }} text="Connect"/>
 
   </div>
@@ -36,6 +49,8 @@ function ModalContent() {
 export default function ConnectModal() {
 
   useEffect(() => {
+    // openModalConnectWithProps({})
+
     if (
         _.isEmpty(localStorage.getItem('username')) ||
         _.isEmpty(localStorage.getItem('host')) ||

@@ -23,7 +23,7 @@ export default function Input(props: Props) {
         <select
             value={props.value}
             onChange={(e) => props.setValue(e.target.value)}
-            className="py-2 outline-none w-full font-normal bg-gray-50 text-xs border border-gray-200 rounded-md px-3"
+            className="py-2 outline-none w-full font-normal bg-gray-50 text-sm border border-gray-200 rounded-md px-3"
         >
           {props.options?.map(i =>
               <option value={i}>{i}</option>
@@ -36,7 +36,7 @@ export default function Input(props: Props) {
             type={props.type}
             placeholder={props.placeholder}
             onChange={(e) => props.setValue(e.target.value)}
-            className="py-2 outline-none w-full font-normal bg-gray-50 text-xs border border-gray-200 rounded-md px-3"
+            className="py-2 outline-none w-full font-normal bg-gray-50 text-sm border border-gray-200 rounded-md px-3"
         />
       </Else>
     </If>
