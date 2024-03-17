@@ -3,6 +3,8 @@ import {$pluginKit} from "@/app/kits/PluginKit";
 import _ from "lodash";
 import axios from "axios";
 import {$clockKit} from "@/app/kits/ClockKit";
+import normalizeUrl from 'normalize-url';
+import UrlAssembler from 'url-assembler'
 
 const basic = require('basic-authorization-header');
 
@@ -30,18 +32,30 @@ export class NetworkKit {
         }
       }
   ) {
+    const [isLoading, setIsLoading] = useState(true)
     const [value, setValue] = useState<T|undefined>()
     const [ticker, setTick] = useState<number>(0)
     const [enabled, setEnabled] = useState(true)
 
     const updateData = (resolve: (value: T) => void, reject: (() => void)|undefined) => {
       $pluginKit.getConfigs().then((config: any) => {
-        const baseUrl = localStorage.getItem("host") || _.get(config, 'main.network.trafficLightUri')
+        let baseUrl = localStorage.getItem("host") || _.get(config, 'main.network.trafficLightUri')
+
         const auth = basic(localStorage.getItem("username"), sessionStorage.getItem("password"))
         const params = new URLSearchParams();
 
+        if (!baseUrl?.endsWith("/")) {
+          baseUrl = baseUrl + "/"
+        }
+
+        const normalizedUrl = normalizeUrl(baseUrl + '/' + path, {
+          removeExplicitPort: true,
+          sortQueryParameters: true,
+          removeTrailingSlash: true
+        })
+
         if (method == 'POST') {
-          axios.post(`${baseUrl}/${path}`, data, {
+          axios.post(normalizedUrl, data, {
             headers: {
               'Authorization': auth || _.get(config, 'main.network.trafficLightAuthHeader')
             },
@@ -58,9 +72,12 @@ export class NetworkKit {
                 }
                 console.error(e)
                 options?.onError?.()
+              })
+              .finally(() => {
+                setIsLoading(false)
               })
         } else {
-          axios.get(`${baseUrl}/${path}`, {
+          axios.get(normalizedUrl, {
             headers: {
               'Authorization': auth || _.get(config, 'main.network.trafficLightAuthHeader')
             },
@@ -77,6 +94,9 @@ export class NetworkKit {
                 }
                 console.error(e)
                 options?.onError?.()
+              })
+              .finally(() => {
+                setIsLoading(false)
               })
         }
       })
@@ -102,6 +122,7 @@ export class NetworkKit {
 
     return {
       value,
+      isLoading,
       forceUpdate() {
         setTick(ticker + 1)
       }
