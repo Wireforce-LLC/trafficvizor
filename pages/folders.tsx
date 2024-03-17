@@ -10,7 +10,6 @@ import ShadowContainer from "@/components/ShadowContainer";
 import {Else, If, Then} from "react-if";
 import ViewSpinner from "@/components/ViewSpinner";
 
-const TableRouters = lazy(() => import("@/components/TableRouters"))
 
 export default function Routers() {
   const { value, isLoading } = $networkKit.liveGetData(
